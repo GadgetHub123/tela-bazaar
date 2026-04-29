@@ -5,10 +5,12 @@ import Link from "next/link";
 
 export default async function ProfilePage() {
   const session = await auth();
-  if (!session) redirect("/login");
+  if (!session || !session.user || !session.user.id) redirect("/login");
+
+  const userId = session.user.id as string;
 
   const orders = await prisma.order.findMany({
-    where: { userId: session.user.id },
+    where: { userId },
     include: { items: { include: { product: true } } },
     orderBy: { createdAt: "desc" },
   });
@@ -18,8 +20,6 @@ export default async function ProfilePage() {
 
   return (
     <div className="bg-[#FDFAF6] min-h-screen">
-
-      {/* Hero Banner */}
       <div className="relative bg-gray-900 py-20 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1600')] bg-cover bg-center opacity-20" />
         <div className="relative z-10 max-w-4xl mx-auto flex items-center gap-6">
@@ -35,8 +35,6 @@ export default async function ProfilePage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-12">
-
-        {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-12">
           {[
             { label: "Total Orders", value: orders.length, icon: "📦" },
@@ -51,7 +49,6 @@ export default async function ProfilePage() {
           ))}
         </div>
 
-        {/* Admin Link */}
         {(session.user as any).role === "admin" && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-8 flex items-center justify-between">
             <div>
@@ -64,7 +61,6 @@ export default async function ProfilePage() {
           </div>
         )}
 
-        {/* Orders */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">Iyong mga Order</h2>
           <p className="text-sm text-gray-400">{orders.length} orders</p>
@@ -86,24 +82,18 @@ export default async function ProfilePage() {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="font-mono text-xs text-gray-400 mb-0.5">#{order.id.slice(0, 12).toUpperCase()}</p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(order.createdAt).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })}
-                    </p>
+                    <p className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleDateString("en-PH", { year: "numeric", month: "long", day: "numeric" })}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-medium capitalize">
-                      {order.status}
-                    </span>
+                    <span className="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-medium capitalize">{order.status}</span>
                     <span className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-medium capitalize">
                       {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod}
                     </span>
                   </div>
                 </div>
-
-                {/* Product thumbnails */}
                 <div className="flex gap-2 mb-4">
                   {order.items.slice(0, 5).map((item) => (
-                    <div key={item.id} className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                    <div key={item.id} className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden">
                       <img src={item.product.imageUrl} alt={item.product.name} className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -113,7 +103,6 @@ export default async function ProfilePage() {
                     </div>
                   )}
                 </div>
-
                 <div className="flex justify-between items-center pt-3 border-t border-gray-50">
                   <p className="text-xs text-gray-400">{order.items.length} item(s)</p>
                   <p className="font-bold text-gray-900">&#8369;{order.total.toFixed(2)}</p>
