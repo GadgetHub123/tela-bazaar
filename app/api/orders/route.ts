@@ -5,13 +5,15 @@ import { sendOrderConfirmationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { items, total, address, paymentMethod } = await req.json();
 
+  const userId = session.user.id as string;
+
   const order = await prisma.order.create({
     data: {
-      userId: session.user.id,
+      userId,
       total,
       address,
       paymentMethod,
@@ -26,7 +28,6 @@ export async function POST(req: Request) {
     include: { items: { include: { product: true } } },
   });
 
-  // Send confirmation email
   try {
     await sendOrderConfirmationEmail({
       to: session.user.email!,
@@ -50,10 +51,10 @@ export async function POST(req: Request) {
 
 export async function GET() {
   const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const orders = await prisma.order.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id as string },
     include: { items: { include: { product: true } } },
     orderBy: { createdAt: "desc" },
   });
