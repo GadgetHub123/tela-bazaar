@@ -26,16 +26,13 @@ export default function PromoSection({ products }: { products: Product[] }) {
     const section = sectionRef.current;
     if (!section) return;
 
-    // Text fade in
     gsap.fromTo(textRef.current,
       { y: 60, opacity: 0 },
-      {
-        y: 0, opacity: 1, duration: 1, ease: "power3.out",
+      { y: 0, opacity: 1, duration: 1, ease: "power3.out",
         scrollTrigger: { trigger: section, start: "top 80%" }
       }
     );
 
-    // Each card parallax at different speeds
     const cards = [card0, card1, card2, card3];
     const speeds = [-40, -70, -50, -60];
 
@@ -43,9 +40,8 @@ export default function PromoSection({ products }: { products: Product[] }) {
       if (!card.current) return;
       gsap.fromTo(card.current,
         { y: 60, opacity: 0 },
-        {
-          y: 0, opacity: 1, duration: 0.8, ease: "power3.out",
-          scrollTrigger: { trigger: section, start: "top 75%", delay: i * 0.1 }
+        { y: 0, opacity: 1, duration: 0.8, delay: i * 0.1, ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 75%" }
         }
       );
       gsap.to(card.current, {
@@ -68,8 +64,6 @@ export default function PromoSection({ products }: { products: Product[] }) {
   return (
     <section ref={sectionRef} className="bg-[#1d1d1f] py-28 px-6 overflow-hidden">
       <div className="max-w-6xl mx-auto">
-
-        {/* Text */}
         <div ref={textRef} className="text-center mb-20" style={{ opacity: 0 }}>
           <p className="text-xs uppercase tracking-widest text-amber-400 mb-4">Bagong Koleksyon</p>
           <h2 className="text-5xl md:text-6xl font-bold text-white mb-5 leading-tight">
@@ -88,7 +82,6 @@ export default function PromoSection({ products }: { products: Product[] }) {
           </div>
         </div>
 
-        {/* Cards with individual parallax */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
           {products.slice(0, 4).map((p, i) => (
             <Link
@@ -113,7 +106,6 @@ export default function PromoSection({ products }: { products: Product[] }) {
             </Link>
           ))}
         </div>
-
       </div>
     </section>
   );
