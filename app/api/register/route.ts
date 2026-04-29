@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   const { name, email, password } = await req.json();
@@ -15,6 +14,7 @@ export async function POST(req: Request) {
   });
 
   try {
+    const { sendWelcomeEmail } = await import("@/lib/email");
     await sendWelcomeEmail({ to: email, customerName: name });
   } catch (err) {
     console.error("Welcome email error:", err);

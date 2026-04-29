@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { sendOrderConfirmationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -30,6 +29,7 @@ export async function POST(req: Request) {
   });
 
   try {
+    const { sendOrderConfirmationEmail } = await import("@/lib/email");
     await sendOrderConfirmationEmail({
       to: session.user.email!,
       customerName: session.user.name!,
